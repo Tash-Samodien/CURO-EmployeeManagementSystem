@@ -1,0 +1,60 @@
+def get_employee_reports(employee_id):
+    # Query the database to get all reports for the selected employee
+    conn = sqlite3.connect('employees.db')
+    c = conn.cursor()
+    c.execute(f"SELECT * FROM behavior_reports WHERE employee_id = '{employee_id}'")
+    reports = c.fetchall()
+
+    # Create a new window to display the results
+    report_window = tk.Toplevel(root)
+    report_window.title("Reports for Employee ID: " + employee_id)
+
+    # Create a table to display the reports
+    report_table = ttk.Treeview(report_window)
+    report_table.pack()
+
+    # Define the columns of the table
+    report_table["columns"] = ("Report ID", "Report Date", "Report Details", "Delete")
+    report_table.column("#0", width=0, stretch=tk.NO)
+    report_table.column("Report ID", anchor=tk.CENTER, width=100)
+    report_table.column("Report Date", anchor=tk.CENTER, width=200)
+    report_table.column("Report Details", anchor=tk.CENTER, width=200)
+    report_table.column("Delete", anchor=tk.CENTER, width=100)
+
+    def delete_report():
+        # Get the selected report from the table
+        selected_item = report_table.selection()[0]
+        report_id = report_table.item(selected_item, "values")[0]
+
+        # Delete the selected report from the database
+        conn = sqlite3.connect('employees.db')
+        c = conn.cursor()
+        c.execute(f"DELETE FROM behavior_reports WHERE id = '{report_id}'")
+        conn.commit()
+        conn.close()
+
+        # Refresh the table to remove the deleted report
+        report_window.destroy()
+        get_employee_reports(employee_id)
+
+    # Create headings for the columns
+    report_table.heading("#0", text="", anchor=tk.CENTER)
+    report_table.heading("Report ID", text="Report ID", anchor=tk.CENTER)
+    report_table.heading("Report Date", text="Report Date", anchor=tk.CENTER)
+    report_table.heading("Report Details", text="Report Details", anchor=tk.CENTER)
+    report_table.heading("Delete", text="", anchor=tk.CENTER)
+
+    # Insert data into the Treeview
+    for row in reports:
+        report_table.insert('', 'end', text=row[0], values=(row[0], row[2], row[3], ""))
+
+    # Get the selected employee's supervisor ID
+    c.execute(f"SELECT supervisor_id FROM employees WHERE id = '{employee_id}'")
+    supervisor_id = c.fetchone()[0]
+
+    # Recursively call this function for the supervisor's ID if they have one
+    if supervisor_id:
+        report_table.insert('', 'end', text="Supervisor Reports", values=("Supervisor Reports", "", "", ""))
+        get_employee_reports(supervisor_id)
+
+    conn.close()
