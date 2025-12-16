@@ -15,8 +15,8 @@ This is a simple **Employee Management System** built using **Python** and **SQL
 ## Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/employee-management-system.git
-   cd employee-management-system
+   git clone https://github.com/Tash-Samodien/CURO-EmployeeManagementSystem.git
+   cd CURO-EmployeeManagementSystem
    ```  
 2. Run the application:
    ```bash
